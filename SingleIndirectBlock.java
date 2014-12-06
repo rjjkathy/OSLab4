@@ -10,27 +10,27 @@ public class SingleIndirectBlock {
 
 	// File name
 	private String fileName = "level1_indirection.txt";
-	
-	// Starting block index
-	private int startingIndex;
-	
+		
 	// Stores 100 SingleIndirectBlocks
 	private ArrayList<DirectBlock> directBlocks = new ArrayList<DirectBlock>();
 	
-	public SingleIndirectBlock(int startingIndex)
+	public SingleIndirectBlock()
 	{
-		// Records the corresponding starting index of the real block index
-		this.startingIndex = startingIndex;
+
 	}
 	/**
 	 * get the block index in this array from the real block index
 	 * The Single Indirect Block contains max of 100 direct block, starting from blockIndex 12 up to blockIndex 111
 	 * @param blockIndex
 	 * @return int the target index in this class
+	 * @throws Exception 
 	 */
-	public int getIndexOfDirectBlock(int actualBlockIndex)
+	public int getIndexOfDirectBlock(int actualBlockIndex) throws Exception
 	{
-		if(actualBlockIndex < 12)
+		if(actualBlockIndex < 12 || actualBlockIndex > 111)
+		{
+			throw new Exception("block number < 12 or > 111, should not access SIB");
+		}
 		return actualBlockIndex - 12;
 	}
 	
@@ -38,8 +38,9 @@ public class SingleIndirectBlock {
 	 * gets the corresponding DB from the list according to the actual block index
 	 * @param actualBlockIndex the actual block index
 	 * @return
+	 * @throws Exception 
 	 */
-	public DirectBlock getDirectBlockFromBlockIndex(int actualBlockIndex)
+	public DirectBlock getDirectBlockFromBlockIndex(int actualBlockIndex) throws Exception
 	{
 		int targetIndex = this.getIndexOfDirectBlock(actualBlockIndex);
 		return directBlocks.get(targetIndex);
