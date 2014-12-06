@@ -27,6 +27,8 @@ public class Inode {
 	private HashMap<String, String> numberToStringMap = new HashMap<String, String>();
 
 	private PrintWriter printer;
+	private PrintWriter level1Printer;
+	private PrintWriter level2Printer;
 
 	public Inode(File inputFile) {
 		try {
@@ -84,12 +86,16 @@ public class Inode {
 					data = stringArray[1];
 					if (blockNum >= 0 && blockNum < 12) {
 						level0Block.set(blockNum, new DirectBlock(blockNum));
-						writeToFile(blockNum, data);
+						writeToSuperFile(blockNum, data);
 					} else if (blockNum >= 12 && blockNum < 112) {
 						int index = level1Block.getIndexOfDirectBlock(blockNum);
 						level1Block.setDirectBlockInfo(index, new DirectBlock(
 								blockNum));
 						level1used = true;
+						if(level1Printer == null){
+							level1Printer = new PrintWriter(level1Block.getFileName());
+						}
+						writeToOtherLevelFile(level1Printer, getDataFileName(blockNum));
 					} else if (blockNum >= 112 && blockNum < 10112) {
 						int index1 = level2Block
 								.getIndexOfSingleIndirectBlock(blockNum);
@@ -99,9 +105,14 @@ public class Inode {
 						sdb.setDirectBlockInfo(index2,
 								new DirectBlock(blockNum));
 						level2used = true;
+						if(level2Printer == null){
+							level2Printer = new PrintWriter(level2Block.getFileName());
+						}
+						writeToOtherLevelFile(level2Printer, getDataFileName(blockNum));
 					}
 				}
 			}
+			
 			if (level1used) {
 				String level1FileName = level1Block.getFileName();
 				printer.println(level1FileName);
@@ -111,6 +122,8 @@ public class Inode {
 			}
 			
 			printer.close();
+			level1Printer.close();
+			level2Printer.close();
 
 		} catch (FileNotFoundException e) {
 			System.err.println("File not found. Please scan in new file.");
@@ -120,9 +133,12 @@ public class Inode {
 	private void addFileToMap(int blockNum, File file) {
 		addressToDataMap.put(blockNum, file);
 	}
-
-	private void writeToFile(int blockNum, String data) {
-
+	
+	private void writeToOtherLevelFile(PrintWriter p, String content){
+		p.println(content);
+	}
+	
+	private String getDataFileName(int blockNum){
 		String blockNumStr = String.valueOf(blockNum);
 		String dataFileName = "";
 		for (int i = 0; i < blockNumStr.length(); i++) {
@@ -131,6 +147,11 @@ public class Inode {
 			dataFileName += result;
 		}
 		dataFileName += ".txt";
+		return dataFileName;
+	}
+
+	private void writeToSuperFile(int blockNum, String data) {
+		String dataFileName = getDataFileName(blockNum);
 		File newFile = new File(dataFileName);
 		printer.println(dataFileName);
 		addFileToMap(blockNum, newFile);
