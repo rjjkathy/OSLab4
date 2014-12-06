@@ -13,10 +13,15 @@ import java.util.Scanner;
 public class Inode {
 	// file name of inode
 	private String fileName;
+	private int maxLevel0Size = 12;
+	private int maxLevel1Size, maxLevel2Size = 100;
+	// 0 ~ 11
 	private ArrayList<DirectBlock> level0Block = new ArrayList<DirectBlock>();
-	private int maxSize = 100;
+	// 12 ~ 111
 	private SingleIndirectBlock level1Block = new SingleIndirectBlock();
+	// 112 ~ 10111
 	private DoubleIndirectBlock level2Block = new DoubleIndirectBlock();
+	// map to get the data file from a block number
 	private HashMap<Integer, File> addressToDataMap = new HashMap<Integer, File>();
 	
 	public Inode(File inputFile){
@@ -25,7 +30,6 @@ public class Inode {
 	}
 	
 	private void init(){
-		//level0Block.set(12, level1Block);
 		
 	}
 	
@@ -47,8 +51,16 @@ public class Inode {
 	            String[] stringArray = str.split(",");
 	            blockNum = Integer.parseInt(stringArray[0]);
 	            data = stringArray[1];
-	            if(!level1Block.isFull()){
-	            	
+	            if(blockNum >=0 && blockNum < 12){
+	            	level0Block.set(blockNum, new DirectBlock(blockNum));
+	            	// add the file
+	            	//addressToDataMap.put(blockNum, file);
+	            }else if(blockNum >= 12 && blockNum < 112){
+	            	int index = level1Block.getIndexOfDirectBlock(blockNum);
+	            	level1Block.set(index, new DirectBlock(blockNum));
+	            }else if(blockNum >= 112 && blockNum < 10112){
+	            	int index = level2Block.getIndexOfSingleIndirectBlock(blockNum);
+	            	SingleDirectBlock sdb = level2Block.
 	            }
 	        }
 	    }
