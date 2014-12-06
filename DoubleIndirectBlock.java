@@ -13,13 +13,25 @@ public class DoubleIndirectBlock {
 	// Stores 100 SingleIndirectBlocks
 	private ArrayList<SingleIndirectBlock> singleIndirectBlocks = new ArrayList<SingleIndirectBlock>();
 	
+	public DoubleIndirectBlock()
+	{
+		init();
+		
+	}
+	
+	private void init()
+	{
+		for(int i = 0; i < 100; i++)
+		{
+			singleIndirectBlocks.add(new SingleIndirectBlock());
+		}
+	}
 	/**
 	 * @return the singleIndirectBlocks
 	 */
 	public SingleIndirectBlock getSingleIndirectBlocksContent(int index) {
 		return singleIndirectBlocks.get(index);
 	}
-
 
 	/**
 	 * @param singleIndirectBlocks the singleIndirectBlocks to set

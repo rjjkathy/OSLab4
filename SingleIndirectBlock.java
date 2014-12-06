@@ -16,7 +16,15 @@ public class SingleIndirectBlock {
 	
 	public SingleIndirectBlock()
 	{
-
+      init();
+	}
+	
+	private void init()
+	{
+		for(int i = 0; i < 100; i++)
+		{
+			directBlocks.add(new DirectBlock(-1));
+		}
 	}
 	/**
 	 * get the block index in this array from the real block index
