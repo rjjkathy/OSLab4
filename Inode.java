@@ -67,17 +67,17 @@ public class Inode {
 					data = stringArray[1];
 					if (blockNum >= 0 && blockNum < 12) {
 						level0Block.set(blockNum, new DirectBlock(blockNum));
-						addFileToMap(blockNum);
+						addFileToMap(blockNum, data);
 					} else if (blockNum >= 12 && blockNum < 112) {
 						int index = level1Block.getIndexOfDirectBlock(blockNum);
 						level1Block.setDirectBlockInfo(index, new DirectBlock(blockNum));
-						addFileToMap(blockNum);
+						addFileToMap(blockNum, data);
 					} else if (blockNum >= 112 && blockNum < 10112) {
 						int index1 = level2Block.getIndexOfSingleIndirectBlock(blockNum);
 						SingleIndirectBlock sdb = level2Block.getSingleIndirectBlocks(index1);
 						int index2 = sdb.getIndexOfDirectBlock(blockNum);
 						sdb.setDirectBlockInfo(index2,new DirectBlock(blockNum));
-						addFileToMap(blockNum);
+						addFileToMap(blockNum, data);
 					}
 				}
 			}
@@ -86,7 +86,7 @@ public class Inode {
 		}
 	}
 	
-	private void addFileToMap(int blockNum){
+	private void addFileToMap(int blockNum, String data){
 		String blockNumStr = String.valueOf(blockNum);
 		String dataFileName = "";
 		for(int i = 0; i < blockNumStr.length();i++){
@@ -94,18 +94,17 @@ public class Inode {
 		}
 		dataFileName += ".txt";
 		File dataFile = new File(dataFileName);
+		writeToFile(dataFile, data);
 		addressToDataMap.put(blockNum, dataFile);
 	}
 
-	private void writeToFile(String fileName, String content) {
+	private void writeToFile(File file, String data) {
 		try {
-			File output = new File(fileName);
-			PrintWriter printer = new PrintWriter(output);
-			printer.write(content);
+			PrintWriter printer = new PrintWriter(file);
+			printer.write(data);
 		} catch (FileNotFoundException e) {
 			System.err.println("File not found. Please scan in new file.");
 		}
-
 	}
 
 	public static void main(String[] args) {
