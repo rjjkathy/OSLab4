@@ -9,7 +9,7 @@ import java.util.Scanner;
  * Inode class
  * 
  * @author ningxie
- *
+ * 
  */
 public class Inode {
 	// file name of inode
@@ -29,10 +29,19 @@ public class Inode {
 	private PrintWriter printer;
 	private PrintWriter level1Printer;
 	private PrintWriter level2Printer;
+	private PrintWriter dataFilePrinter;
+	private File directory;
 
 	public Inode(File inputFile) {
+		String inputFileName = inputFile.getName();
+		String partialDirName = inputFileName.substring(0, inputFileName.length() - 4);
+		String dirName = partialDirName + "_dir";
+		directory = new File(dirName);
+		directory.mkdir();
+
 		try {
-			printer = new PrintWriter(fileName);
+			String path = dirName + "\\" + fileName;
+			printer = new PrintWriter(path);
 		} catch (FileNotFoundException e) {
 			System.out.println("File Not Found!");
 		}
@@ -84,18 +93,41 @@ public class Inode {
 					String[] stringArray = str.split(",");
 					blockNum = Integer.parseInt(stringArray[0]);
 					data = stringArray[1];
+					String dataFileName = getDataFileName(blockNum);
+					File newFile = new File(dataFileName);
 					if (blockNum >= 0 && blockNum < 12) {
+				
+						// set data structure content
 						level0Block.set(blockNum, new DirectBlock(blockNum));
-						writeToSuperFile(blockNum, data);
+						
+						// output to super_block.txt
+						writeToSuperFile(dataFileName);
+						
+						// add to file map
+						addFileToMap(blockNum, newFile);
+						
+						// write fill content
+						dataFilePrinter = new PrintWriter(directory.getName() + "\\" + dataFileName);
+						dataFilePrinter.println(data);
+						dataFilePrinter.close();
 					} else if (blockNum >= 12 && blockNum < 112) {
 						int index = level1Block.getIndexOfDirectBlock(blockNum);
 						level1Block.setDirectBlockInfo(index, new DirectBlock(
 								blockNum));
 						level1used = true;
-						if(level1Printer == null){
-							level1Printer = new PrintWriter(level1Block.getFileName());
+						if (level1Printer == null) {
+							String path = directory.getName()
+									+ "\\" + level1Block.getFileName();
+							level1Printer = new PrintWriter(path);
 						}
-						writeToOtherLevelFile(level1Printer, getDataFileName(blockNum));
+						writeToOtherLevelFile(level1Printer,
+								getDataFileName(blockNum));
+						
+						// write fill content
+						dataFilePrinter = new PrintWriter(directory.getName() + "\\" + dataFileName);
+						dataFilePrinter.println(data);
+						dataFilePrinter.close();
+
 					} else if (blockNum >= 112 && blockNum < 10112) {
 						int index1 = level2Block
 								.getIndexOfSingleIndirectBlock(blockNum);
@@ -105,22 +137,30 @@ public class Inode {
 						sdb.setDirectBlockInfo(index2,
 								new DirectBlock(blockNum));
 						level2used = true;
-						if(level2Printer == null){
-							level2Printer = new PrintWriter(level2Block.getFileName());
+						if (level2Printer == null) {
+							String path = directory.getName()+ "\\" + level2Block.getFileName();
+							level2Printer = new PrintWriter(path);
 						}
-						writeToOtherLevelFile(level2Printer, getDataFileName(blockNum));
+						writeToOtherLevelFile(level2Printer,
+								getDataFileName(blockNum));
+						
+						// write fill content
+						dataFilePrinter = new PrintWriter(directory.getName() + "\\" + dataFileName);
+						dataFilePrinter.println(data);
+						dataFilePrinter.close();
+
 					}
 				}
 			}
-			
 			if (level1used) {
 				String level1FileName = level1Block.getFileName();
 				printer.println(level1FileName);
-			}if(level2used){
+			}
+			if (level2used) {
 				String level2FileName = level2Block.getFileName();
 				printer.println(level2FileName);
 			}
-			
+
 			printer.close();
 			level1Printer.close();
 			level2Printer.close();
@@ -133,12 +173,12 @@ public class Inode {
 	private void addFileToMap(int blockNum, File file) {
 		addressToDataMap.put(blockNum, file);
 	}
-	
-	private void writeToOtherLevelFile(PrintWriter p, String content){
+
+	private void writeToOtherLevelFile(PrintWriter p, String content) {
 		p.println(content);
 	}
-	
-	private String getDataFileName(int blockNum){
+
+	private String getDataFileName(int blockNum) {
 		String blockNumStr = String.valueOf(blockNum);
 		String dataFileName = "";
 		for (int i = 0; i < blockNumStr.length(); i++) {
@@ -150,11 +190,10 @@ public class Inode {
 		return dataFileName;
 	}
 
-	private void writeToSuperFile(int blockNum, String data) {
-		String dataFileName = getDataFileName(blockNum);
-		File newFile = new File(dataFileName);
+	private void writeToSuperFile(String dataFileName) {
+
 		printer.println(dataFileName);
-		addFileToMap(blockNum, newFile);
+
 	}
 
 	private void reafFromAccessFile(String fileName) {
