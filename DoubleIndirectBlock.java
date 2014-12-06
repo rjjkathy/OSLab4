@@ -14,6 +14,23 @@ public class DoubleIndirectBlock {
 	private ArrayList<SingleIndirectBlock> singleIndirectBlocks = new ArrayList<SingleIndirectBlock>();
 	
 	/**
+	 * @return the singleIndirectBlocks
+	 */
+	public ArrayList<SingleIndirectBlock> getSingleIndirectBlocks() {
+		return singleIndirectBlocks;
+	}
+
+
+	/**
+	 * @param singleIndirectBlocks the singleIndirectBlocks to set
+	 */
+	public void setSingleIndirectBlocksContent(int index, SingleIndirectBlock sib)
+	{
+		singleIndirectBlocks.set(index, sib);
+	}
+
+
+	/**
 	 * gets the index of the SIB from the actual block index
 	 * @param blockIndex the actual block index in the file system
 	 * @return the index of the single indirect block in the array in this class
