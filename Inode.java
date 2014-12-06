@@ -74,7 +74,7 @@ public class Inode {
 						addFileToMap(blockNum, data);
 					} else if (blockNum >= 112 && blockNum < 10112) {
 						int index1 = level2Block.getIndexOfSingleIndirectBlock(blockNum);
-						SingleIndirectBlock sdb = level2Block.getSingleIndirectBlocks(index1);
+						SingleIndirectBlock sdb = level2Block.getSingleIndirectBlocksContent(index1);
 						int index2 = sdb.getIndexOfDirectBlock(blockNum);
 						sdb.setDirectBlockInfo(index2,new DirectBlock(blockNum));
 						addFileToMap(blockNum, data);
@@ -112,5 +112,56 @@ public class Inode {
 		File testFile = new File(fileName);
 		Inode inode = new Inode(testFile);
 	}
+	
+	private void reafFromAccessFile(String fileName)
+	{
+		Scanner sc = new Scanner(fileName);
+		String operation ="";
+		int blockNum = 0;
+		String content = "";
+		while(sc.hasNextLine()) {
+			
+			 String str = sc.nextLine();
+		     String[] stringArray = str.split(", ");
+		     int length = stringArray.length;
+		     switch(length){
+		    	 case 1:
+		    		 System.out.println("input length 1, sth wrong!");
+		    		 break;
+		    	 case 2:
+		    		 System.out.println("read an R instruction, verifying");
+		    		 operation = stringArray[0];
+		    		 if(!operation.equals("R"))
+		    		 {
+		    			 System.out.println("should be R but not R, sth wrong");
+		    			 break;
+		    		 }
+		    		 else
+		    		 {
+		    			 blockNum = Integer.parseInt(stringArray[1]);
+		    		 }
+		    		 
+		    		 // DO STH ABOUT READ
+		    		 
+		    		 break;		    		 
+		    	 case 3:
+		    		 System.out.println("read an W instruction, verifying");
+		    		 operation = stringArray[0];
+		    		 if(!operation.equals("W"))
+		    		 {
+		    			 System.out.println("should be W but not W, sth wrong");
+		    			 break;
+		    		 }
+		    		 else
+		    		 {
+		    			 blockNum = Integer.parseInt(stringArray[1]);
+		    			 content = stringArray[2];	        			 
+		    		 }
+		    		 
+		    		 // DO STH ABOUT WRITE
+		    		 
+		    		 break;
+		     }           
+		}
 
 }
