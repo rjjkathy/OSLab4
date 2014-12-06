@@ -69,4 +69,8 @@ public class DoubleIndirectBlock {
 		int targetIndex = this.getIndexOfSingleIndirectBlock(actualBlockIndex);
 		return singleIndirectBlocks.get(targetIndex);
 	}
+	
+	public String getFileName(){
+		return fileName;
+	}
 }

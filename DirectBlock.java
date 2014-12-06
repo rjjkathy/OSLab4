@@ -1,6 +1,6 @@
 /**
  * Direct block contains address of block that has data
- * @author RJJ&Ning
+ * @author RJJ
  *
  */
 public class DirectBlock {

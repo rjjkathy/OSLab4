@@ -66,4 +66,8 @@ public class SingleIndirectBlock {
 	public void setDirectBlockInfo(int index, DirectBlock db) {
 		this.directBlocks.set(index, db);
 	}
+	
+	public String getFileName(){
+		return fileName;
+	}
 }
