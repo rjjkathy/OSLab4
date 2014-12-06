@@ -23,13 +23,12 @@ public class SingleIndirectBlock {
 	 * The Single Indirect Block contains max of 100 direct block, starting from blockIndex 12 up to blockIndex 111
 	 * @param blockIndex
 	 * @return int the target index in this class
-	 * @throws Exception 
 	 */
-	public int getIndexOfDirectBlock(int actualBlockIndex) throws Exception
+	public int getIndexOfDirectBlock(int actualBlockIndex)
 	{
 		if(actualBlockIndex < 12 || actualBlockIndex > 111)
 		{
-			throw new Exception("block number < 12 or > 111, should not access SIB");
+		    System.out.println("block number < 12 or > 111, should not access SIB");
 		}
 		return actualBlockIndex - 12;
 	}
@@ -40,7 +39,7 @@ public class SingleIndirectBlock {
 	 * @return
 	 * @throws Exception 
 	 */
-	public DirectBlock getDirectBlockFromBlockIndex(int actualBlockIndex) throws Exception
+	public DirectBlock getDirectBlockFromBlockIndex(int actualBlockIndex)
 	{
 		int targetIndex = this.getIndexOfDirectBlock(actualBlockIndex);
 		return directBlocks.get(targetIndex);
