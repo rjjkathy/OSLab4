@@ -46,4 +46,9 @@ public class SingleIndirectBlock {
 		return directBlocks.get(targetIndex);
 	}
 
+	// setter for the directBlocks arraylist
+    public void setDirectBlockInfo(int index, DirectBlock db)
+    {
+    	this.directBlocks.set(index, db);
+    }
 }
