@@ -1,0 +1,1 @@
+a) Group: Jingjing Rong, Ning Xieb) Compile:  javac *.javaRun: java Inode <input file name> <access trace file name>Eg:  java Inode input_file1.txt access_trace1.txt
