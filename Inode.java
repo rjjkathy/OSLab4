@@ -207,6 +207,8 @@ public class Inode {
 						// If this is the last DB to put in the SIB, then this
 						// SIB will become the previous one
 						prevLevel2SubIndex = indexSIB;
+					}else{
+						System.out.println("Input file greater than max supported file size!");
 					}
 				}
 				// keep track of the largest block number
@@ -290,6 +292,11 @@ public class Inode {
 						break;
 					} else {
 						blockNum = Integer.parseInt(stringArray[1]);
+						if(blockNum >= 10112 ){
+							System.out.println("Invalid block number!");
+							break;
+						}
+						
 						if(blockNum > maxBlockNumSofar)
 						{
 							System.out.println("This block number " + blockNum+ " is out of range, no such entry yet!");
