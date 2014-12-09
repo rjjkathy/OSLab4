@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 /**
- * Inode class, writes input .txt files into actual files in system, and reads
- * and writes according to the files
+ * Inode class, writes input.txt files into actual files in system, and reads
+ * and writes according to the instructions in the access files.
  * 
- * @author Ning&Jingjing
+ * @author Ning & Jingjing
  * 
  */
 public class Inode {
@@ -18,12 +18,10 @@ public class Inode {
 	private String level1FileName = "level1_indirection.txt";
 	private String level2FileName = "level2_indirection.txt";
 
-	// Sizes of each level
-	private int maxLevel0Size = 12;
-	private int maxLevel1Size, maxLevel2Size = 100;
+	// size of block so far
 	private int maxBlockNumSofar = 0;
 
-	// This is used for generating string names from int block number
+	// This is used for generating string names from integer block number
 	private HashMap<String, String> numberToStringMap = new HashMap<String, String>();
 
 	// Printers each in charge of printing to one kind of file
@@ -93,7 +91,6 @@ public class Inode {
 			Scanner sc = new Scanner(inputFile);
 			int blockNum = 0;
 			String data = "";
-			// skip first line
 			boolean level1used = false;
 			boolean level2used = false;
 
@@ -111,42 +108,33 @@ public class Inode {
 					blockNum = Integer.parseInt(stringArray[0]);
 					data = stringArray[1];
 					String dataFileName = getDataFileName(blockNum);
-					File newFile = new File(dataFileName);
+	
+					// filling the first 12th direct blocks
 					if (blockNum >= 0 && blockNum < 12) {
-
-						// set data structure content
-						// level0Block.set(blockNum, new DirectBlock(blockNum));
-
 						// output to super_block.txt
 						printer.println(dataFileName);
-
-						// add to file map
-						// addFileToMap(blockNum, newFile);
-
 						// write data file content
 						dataFilePrinter = new PrintWriter(directory.getName()
 								+ "\\" + dataFileName);
 						dataFilePrinter.println(data);
-						dataFilePrinter.close();
-
-					} else if (blockNum >= 12 && blockNum < 112) {
-
-						// if somewhere in the 13th block
-						int index = getIndexOfDirectBlock(blockNum);
-						// level1Block.setDirectBlockInfo(index, new
-						// DirectBlock(blockNum));
+						dataFilePrinter.close();	
+					}
+					// filling the blocks in the indirect block the 13th pointer points to
+					else if (blockNum >= 12 && blockNum < 112) {
+						// level 1 is used
 						level1used = true;
-
 						// set the printer to write the lvl1 file
 						if (level1Printer == null) {
 							String path = directory.getName() + "\\"
 									+ level1FileName;
 							level1Printer = new PrintWriter(path);
 						}
+						
+						// print all the data file names in the level 1 file
 						writeToOtherLevelFile(level1Printer,
 								getDataFileName(blockNum));
 
-						// write use data printer to fill in the data content
+						// write using data printer to fill in the data content
 						dataFilePrinter = new PrintWriter(directory.getName()
 								+ "\\" + dataFileName);
 						dataFilePrinter.println(data);
@@ -221,8 +209,10 @@ public class Inode {
 						prevLevel2SubIndex = indexSIB;
 					}
 				}
+				// keep track of the largest block number
 				maxBlockNumSofar = blockNum;
 			}
+			
 			if (level1used) {
 				printer.println(level1FileName);
 			}
@@ -268,6 +258,10 @@ public class Inode {
 		return extracted(dataFileName);
 	}
 
+	/**
+	 * Helper, gets the instructions from the access file and executes them.
+	 * @param fileName access file name
+	 */
 	private void readFromAccessFile(File fileName) {
 
 		Scanner sc;
@@ -279,15 +273,17 @@ public class Inode {
 			String content = "";
 			while (sc.hasNextLine()) {
 
+				// parse the instruction into block number and content
 				String str = sc.nextLine();
-				String[] stringArray = str.split(", ");
+				String[] stringArray = str.split(",");
 				int length = stringArray.length;
 				switch (length) {
 				case 1:
 					System.out.println("input length 1, sth wrong!");
 					break;
 				case 2:
-					System.out.println("read an R instruction, verifying");
+					System.out.println("Instruction: " + str);
+					//System.out.println("read an R instruction, verifying");
 					operation = stringArray[0];
 					if (!operation.equals("R")) {
 						System.out.println("should be R but not R, sth wrong");
@@ -311,7 +307,8 @@ public class Inode {
 					break;
 
 				case 3:
-					System.out.println("read an W instruction, verifying");
+					System.out.println("Instruction: " + str);
+					//System.out.println("read an W instruction, verifying");
 					operation = stringArray[0];
 					if (!operation.equals("W")) {
 						System.out.println("should be W but not W, sth wrong");
@@ -331,16 +328,18 @@ public class Inode {
 	}
 
 	/**
-	 * Helper with read operation
+	 * Helper with read operation, reads the data corresponding
+	 * to the block number being passed in.
 	 * 
-	 * @param targetBlockNum
+	 * @param targetBlockNum block number passed in
 	 * @return
 	 */
 	private String RetrieveTargetBlockData(int targetBlockNum, boolean writing,
 			String newValue) {
 
 		if (targetBlockNum >= 0 && targetBlockNum < 12) {
-
+			
+			// level 0 blocks, access level 0 data files
 			return retrieveFromLevel0(targetBlockNum, writing, newValue);
 
 		} else if (targetBlockNum >= 12 && targetBlockNum < 112) {
@@ -360,15 +359,22 @@ public class Inode {
 		}
 	}
 
+	/**
+	 * Helper with read and write operations, reads and writes to data files in level 2
+	 * @param targetBlockNum - block number
+	 * @param writing - if this is a write operation
+	 * @param newValue - new value to replace the date
+	 * @return
+	 */
 	private String retrieveFromLevel2(int targetBlockNum, boolean writing,
 			String newValue) {
-		// Double Direct Blocks
+		// Double Indirect Blocks
 		try {
 			Scanner scanner = new Scanner(new File(directory.getName() + "\\"
 					+ superFileName));
 			// read the level 1 menu file name
-			System.out.println("accessing pointer " + 14
-					+ "th pointer of inode. ");
+			System.out.println("Accessing pointer " + 14
+					+ " of inode; ");
 
 			for (int i = 0; i <= 13; i++) {
 				// skip the first 14 lines in front of target line, 1 line of
@@ -385,8 +391,8 @@ public class Inode {
 			// Now calculate the index in the level1 file we need to read.
 			int indexSIB = getIndexOfSingleIndirectBlock(targetBlockNum);
 
-			System.out.println("next accessing the #" + indexSIB
-					+ "entry of file " + level2FileName);
+			System.out.println("next, read the " + indexSIB
+					+ "th entry of file '" + level2FileName + "'.");
 
 			// Skip all the indices smaller than the target index
 			for (int j = 0; j < indexSIB; j++) {
@@ -414,11 +420,14 @@ public class Inode {
 					+ DBFileName));
 			String result = scanner.nextLine();
 			
+			// for writing to data files
 			if(writing)
 			{
 				PrintWriter p = new PrintWriter(directory.getName() + "\\"
 						+ DBFileName);
 				p.println(newValue);
+				System.out.println("Writing to data file: " + newValue);
+				System.out.println();
 				p.close();
 			}
 			return result;
@@ -429,6 +438,13 @@ public class Inode {
 		}
 	}
 
+	/**
+	 * Helper with read and write operations in level 0
+	 * @param targetBlockNum - block number
+	 * @param writing - if this is a write operation
+	 * @param newValue - new value to replace the date
+	 * @return
+	 */
 	private String retrieveFromLevel0(int targetBlockNum, boolean writing,
 			String newValue) {
 		// Direct Blocks
@@ -437,13 +453,12 @@ public class Inode {
 					+ superFileName));
 			// data blocks
 			System.out
-					.println("accessing pointer "
+					.println("Accessing pointer "
 							+ targetBlockNum
-							+ "th pointer of inode. "
-							+ "Next access the #"
-							+ (targetBlockNum + 1)
-							+ " entry of super_block.txt file, assuming start from #0, "
-							+ "and first entry is file name");
+							+ " of inode; "
+							+ "next, read the "
+							+ (targetBlockNum)
+							+ "th entry of 'super_block.txt' file.");
 
 			for (int i = 0; i < targetBlockNum + 1; i++) {
 				// skip the lines in front of target line
@@ -460,11 +475,14 @@ public class Inode {
 			// file
 			String result = scanner.nextLine();
 
+			// for writing to data files
 			if(writing)
 			{
 				PrintWriter p = new PrintWriter(directory.getName() + "\\"
 						+ targetFileName);
 				p.println(newValue);
+				System.out.println("Writing to data file: " + newValue);
+				System.out.println();
 				p.close();
 			}
 			
@@ -474,17 +492,24 @@ public class Inode {
 			return e.getMessage();
 		}
 	}
-
+	
+	/**
+	 * Helper with read and write operations in level 1
+	 * @param targetBlockNum - block number
+	 * @param writing - if this is a write operation
+	 * @param newValue - new value to replace the date
+	 * @return
+	 */
 	private String retrieveFromLevel1(int targetBlockNum, boolean writing,
 			String newValue) {
 
-		// Single Direct Blocks
+		// Single Indirect Blocks
 		try {
 			Scanner scanner = new Scanner(new File(directory.getName() + "\\"
 					+ superFileName));
 			// read the level 1 menu file name
-			System.out.println("accessing pointer " + 13
-					+ "th pointer of inode. ");
+			System.out.println("Accessing pointer " + 12
+					+ " of inode; ");
 
 			for (int i = 0; i <= 12; i++) {
 				// skip the first 13 lines in front of target line, 1 line of
@@ -501,8 +526,8 @@ public class Inode {
 			// Now calculate the index in the level1 file we need to read.
 			int index = getIndexOfDirectBlock(targetBlockNum);
 
-			System.out.println("next accessing the #" + index
-					+ "entry of file " + level1FileName);
+			System.out.println("next, read the " + index
+					+ "th entry of file '" + level1FileName + "'.");
 			// Skip all the indices smaller than the target index
 			for (int j = 0; j < index; j++) {
 				scanner.nextLine();
@@ -516,11 +541,14 @@ public class Inode {
 					+ dataFileName));
 			String result = scanner.nextLine();
 			
+			// for writing
 			if(writing)
 			{
 				PrintWriter p = new PrintWriter(directory.getName() + "\\"
 						+ dataFileName);
 				p.println(newValue);
+				System.out.println("Writing to data file: " + newValue);
+				System.out.println();
 				p.close();
 			}		
 			return result;
@@ -530,6 +558,11 @@ public class Inode {
 		}
 	}
 
+	/**
+	 * 
+	 * @param result
+	 * @return
+	 */
 	private String extracted(String result) {
 		return result;
 	}
@@ -573,14 +606,32 @@ public class Inode {
 		return actualBlockIndex - 12;
 	}
 
-	public static void main(String[] args) {
-		String fileName = "input_file1.txt";
-		String readAndWriteFileName = "access_trace1.txt";
-
-		File testFile = new File(fileName);
-		Inode inode = new Inode(testFile);
-		File accessFile = new File(readAndWriteFileName);
-		inode.readFromAccessFile(accessFile);
-
+	public static void main(String[] args) throws FileNotFoundException {	
+		
+		// for reading input file and access file from command line
+		if(args.length > 0){
+			
+			String fileName = args[0];
+			String readAndWriteFileName = args[1];
+			Inode inode = null;
+			
+			if(!fileName.equals("")){
+				File testFile = new File(fileName);
+				inode = new Inode(testFile);
+			}else{
+				System.out.println("Invalid input file name!");
+			}
+			
+			if(!readAndWriteFileName.equals("")){
+				File accessFile = new File(readAndWriteFileName);
+				if(inode!=null){
+					inode.readFromAccessFile(accessFile);
+				}else{
+					System.out.println("Inode is null!");
+				}
+			}else{
+				System.out.println("Invalid access file name!");
+			}
+		}
 	}
 }
