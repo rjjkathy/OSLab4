@@ -277,7 +277,19 @@ public class Inode {
 
 				// parse the instruction into block number and content
 				String str = sc.nextLine();
-				String[] stringArray = str.split(",");
+				String stringNoSpace = "";
+				char[] charArray = str.toCharArray();
+				
+				// Get rid of the space after comma in the string
+				for(int i = 0; i < charArray.length; i++)
+				{
+					if (charArray[i] != ' ')
+					{
+						stringNoSpace += Character.toString(charArray[i]);
+					}
+				}
+				
+				String[] stringArray = stringNoSpace.split(",");
 				int length = stringArray.length;
 				switch (length) {
 				case 1:
@@ -303,7 +315,6 @@ public class Inode {
 							break;
 						}
 					}
-
 					// DO STH ABOUT READ
 					int targetBlockNum = Integer.parseInt(stringArray[1]);
 					// only reading not writing
